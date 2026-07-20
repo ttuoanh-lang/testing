@@ -36,6 +36,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local sqlite db
+game.db
+
+# downloaded local model weights (proof-of-concept grading path)
+.model-cache/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
