@@ -11,10 +11,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "winner_name and score are required" }, { status: 400 });
   }
 
-  insertScore(winnerName, score, roundsCompleted);
+  await insertScore(winnerName, score, roundsCompleted);
   return NextResponse.json({ ok: true });
 }
 
 export async function GET() {
-  return NextResponse.json({ scores: getTopScores(20) });
+  return NextResponse.json({ scores: await getTopScores(20) });
 }

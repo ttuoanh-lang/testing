@@ -3,8 +3,8 @@ import { getTopScores } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default function LeaderboardPage() {
-  const scores = getTopScores(20);
+export default async function LeaderboardPage() {
+  const scores = await getTopScores(20);
 
   return (
     <main className="flex flex-col flex-1 max-w-md mx-auto w-full px-6 py-10">

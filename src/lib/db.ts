@@ -1,34 +1,24 @@
-import Database from "better-sqlite3";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 import type { ScoreRow } from "./types";
 
-const db = new Database(path.join(process.cwd(), "game.db"));
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    winner_name TEXT NOT NULL,
-    score INTEGER NOT NULL,
-    rounds_completed INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  )
-`);
+export async function insertScore(winnerName: string, score: number, roundsCompleted: number): Promise<void> {
+  const { error } = await supabase
+    .from("scores")
+    .insert({ winner_name: winnerName, score, rounds_completed: roundsCompleted });
 
-const insertStmt = db.prepare(
-  `INSERT INTO scores (winner_name, score, rounds_completed) VALUES (?, ?, ?)`
-);
-
-const topScoresStmt = db.prepare(
-  `SELECT id, winner_name, score, rounds_completed, created_at
-   FROM scores
-   ORDER BY score DESC, created_at ASC
-   LIMIT ?`
-);
-
-export function insertScore(winnerName: string, score: number, roundsCompleted: number): void {
-  insertStmt.run(winnerName, score, roundsCompleted);
+  if (error) throw error;
 }
 
-export function getTopScores(limit = 20): ScoreRow[] {
-  return topScoresStmt.all(limit) as ScoreRow[];
+export async function getTopScores(limit = 20): Promise<ScoreRow[]> {
+  const { data, error } = await supabase
+    .from("scores")
+    .select("id, winner_name, score, rounds_completed, created_at")
+    .order("score", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) throw error;
+  return data as ScoreRow[];
 }
